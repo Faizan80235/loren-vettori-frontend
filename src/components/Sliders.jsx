@@ -70,8 +70,28 @@ export default function TwoSliders() {
     dotsClass: "slick-dots slick-custom-dots",
     responsive: [
       {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          dots: true
+        }
+      },
+      {
         breakpoint: 768,
         settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          arrows: false,
+          dots: true,
+          autoplaySpeed: 3000
+        }
+      },
+      {
+        breakpoint: 640,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
           arrows: false,
           dots: true,
           autoplaySpeed: 3000
@@ -80,6 +100,8 @@ export default function TwoSliders() {
       {
         breakpoint: 480,
         settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
           arrows: false,
           dots: true,
           autoplaySpeed: 3000
@@ -105,29 +127,35 @@ export default function TwoSliders() {
         breakpoint: 1200,
         settings: { 
           slidesToShow: 3,
+          slidesToScroll: 1,
           rows: 2
         } 
       },
       { 
         breakpoint: 1024, 
         settings: { 
-          slidesToShow: 2,
-          rows: 2,
-          arrows: false 
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          rows: 1,
+          arrows: false,
+          autoplaySpeed: 4000
         } 
       },
       { 
         breakpoint: 768, 
         settings: { 
-          slidesToShow: 2,
+          slidesToShow: 1,
+          slidesToScroll: 1,
           rows: 1,
-          arrows: false 
+          arrows: false,
+          autoplaySpeed: 4000
         } 
       },
       { 
         breakpoint: 640, 
         settings: { 
           slidesToShow: 1,
+          slidesToScroll: 1,
           rows: 1,
           arrows: false,
           autoplaySpeed: 4000
@@ -137,6 +165,7 @@ export default function TwoSliders() {
         breakpoint: 480, 
         settings: { 
           slidesToShow: 1,
+          slidesToScroll: 1,
           rows: 1,
           arrows: false,
           autoplaySpeed: 4000
@@ -146,12 +175,12 @@ export default function TwoSliders() {
   };
 
   const Card = ({ item, index }) => (
-    <div className="px-1 sm:px-2 md:px-3 mb-3 sm:mb-5">
-      <div className="group cursor-pointer relative overflow-hidden rounded-lg sm:rounded-xl md:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
+    <div className="px-2 sm:px-3 mb-4 sm:mb-5">
+      <div className="group cursor-pointer relative overflow-hidden rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 mx-auto max-w-sm lg:max-w-none">
         <img
           src={item.img}
           alt={item.title}
-          className="w-full h-48 sm:h-56 md:h-64 lg:h-72 object-cover group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-64 sm:h-56 md:h-64 lg:h-72 object-cover group-hover:scale-110 transition-transform duration-500"
           loading="lazy"
           onError={(e) => {
             // Fallback image if the online image fails to load
@@ -159,15 +188,15 @@ export default function TwoSliders() {
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 transition-all duration-300"></div>
-        <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-6 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-          <h3 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold mb-1 sm:mb-2 group-hover:text-amber-300 transition-colors duration-300 line-clamp-2">
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-4 md:p-6 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+          <h3 className="text-lg sm:text-lg md:text-xl lg:text-2xl font-bold mb-2 group-hover:text-amber-300 transition-colors duration-300 line-clamp-2">
             {item.title}
           </h3>
-          <p className="text-xs sm:text-sm opacity-90 mb-2 sm:mb-3 group-hover:opacity-100 transition-opacity duration-300 line-clamp-2">
+          <p className="text-sm sm:text-sm opacity-90 mb-3 group-hover:opacity-100 transition-opacity duration-300 line-clamp-2">
             {item.desc}
           </p>
           <Link to="/collection">
-            <button className="bg-white text-gray-900 px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium hover:bg-amber-300 hover:text-black transition-all duration-300 transform group-hover:scale-105 shadow-lg">
+            <button className="bg-white text-gray-900 px-4 sm:px-4 md:px-6 py-2 rounded-full text-sm font-medium hover:bg-amber-300 hover:text-black transition-all duration-300 transform group-hover:scale-105 shadow-lg">
               Shop Now
             </button>
           </Link>
@@ -175,7 +204,7 @@ export default function TwoSliders() {
         
         {/* Custom badge for featured items */}
         {index === 0 && (
-          <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-amber-500 text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-bold shadow-lg">
+          <div className="absolute top-4 left-4 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
             Featured
           </div>
         )}
@@ -229,8 +258,10 @@ export default function TwoSliders() {
       </div>
 
       <style jsx>{`
+        /* Mobile-first responsive dots */
         .slick-custom-dots {
-          bottom: -30px;
+          bottom: -35px;
+          text-align: center;
         }
         
         @media (min-width: 640px) {
@@ -240,7 +271,7 @@ export default function TwoSliders() {
         }
         
         .slick-custom-dots li {
-          margin: 0 2px;
+          margin: 0 3px;
         }
         
         @media (min-width: 640px) {
@@ -250,7 +281,7 @@ export default function TwoSliders() {
         }
         
         .slick-custom-dots li button:before {
-          font-size: 8px;
+          font-size: 10px;
           color: #CBD5E0;
           opacity: 1;
         }
@@ -276,30 +307,35 @@ export default function TwoSliders() {
           overflow: hidden;
         }
         
-        /* Mobile slider adjustments */
-        @media (max-width: 640px) {
+        /* Mobile single card optimization */
+        @media (max-width: 1024px) {
           .slick-slide {
-            padding: 0 5px;
+            padding: 0 10px;
           }
           
           .slick-list {
-            margin: 0 -5px;
+            margin: 0 -10px;
           }
-        }
-        
-        /* Ensure proper spacing on mobile */
-        @media (max-width: 480px) {
+          
           .slick-track {
             display: flex !important;
-            align-items: stretch;
           }
           
           .slick-slide > div {
             height: 100%;
+            display: flex;
+            align-items: stretch;
           }
           
           .slick-slide > div > div {
-            height: 100%;
+            width: 100%;
+          }
+        }
+        
+        /* Ensure cards are centered on mobile */
+        @media (max-width: 640px) {
+          .slick-slide {
+            text-align: center;
           }
         }
       `}</style>
