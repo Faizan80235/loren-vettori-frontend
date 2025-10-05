@@ -1,22 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Instagram, Facebook, Twitter, Youtube } from "lucide-react";
+import { ShopContext } from "../context/ShopContext";
+import { toast } from "react-toastify";
 
-// ✅ This wrapper ensures full-width background
 const FullWidthWrapper = styled.footer`
-  // background-color: #f9fafb;
   width: 100%;
-  margin-top:100px;
+  margin-top: 100px;
 `;
 
-// ✅ Max-width container for center alignment
 const FooterContainer = styled.div`
-  max-width: 1200px;
-  margin: 100erm;
-  padding: 8rem 0rem 0erm 0 erm;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 4rem 1rem 2rem 1rem;
 
   @media (min-width: 1440px) {
-    max-width: 1400px; /* Optional: make it wider for large screens */
+    max-width: 1400px;
   }
 `;
 
@@ -39,6 +39,9 @@ const SectionTitle = styled.h3`
   font-weight: 500;
   color: #111827;
   margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 `;
 
 const LinkList = styled.ul`
@@ -52,6 +55,7 @@ const LinkList = styled.ul`
     a {
       color: inherit;
       text-decoration: none;
+      font-size: 0.875rem;
       transition: color 0.2s ease;
 
       &:hover {
@@ -67,30 +71,33 @@ const EmailForm = styled.form`
 
   input {
     flex: 1;
-    padding: 0.5rem 1rem;
+    padding: 0.625rem 1rem;
     border: 1px solid #d1d5db;
     border-right: none;
-    border-radius: 0.375rem 0 0 0.375rem;
+    border-radius: 0.25rem 0 0 0.25rem;
     outline: none;
+    font-size: 0.875rem;
 
     &:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+      border-color: #111827;
     }
   }
 
   button {
-    padding: 0.5rem 1.5rem;
-    background-color: #2563eb;
+    padding: 0.625rem 1.5rem;
+    background-color: #111827;
     color: white;
     font-weight: 500;
+    font-size: 0.75rem;
     border: none;
-    border-radius: 0 0.375rem 0.375rem 0;
+    border-radius: 0 0.25rem 0.25rem 0;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 
     &:hover {
-      background-color: #1e40af;
+      background-color: #000000;
     }
   }
 `;
@@ -112,25 +119,27 @@ const SocialIcons = styled.div`
 
 const CountrySelect = styled.select`
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.625rem;
   border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
+  border-radius: 0.25rem;
   background-color: white;
   margin-bottom: 1rem;
+  font-size: 0.875rem;
+  cursor: pointer;
 
   &:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    border-color: #111827;
   }
 `;
 
 const AccessibilityLink = styled.a`
   display: inline-block;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: #4b5563;
   text-decoration: underline;
   transition: color 0.2s ease;
+  cursor: pointer;
 
   &:hover {
     color: #111827;
@@ -145,14 +154,17 @@ const Copyright = styled.div`
   color: #6b7280;
 `;
 
-// ✅ Footer Component
 const Footer = () => {
+  const { currency } = useContext(ShopContext);
   const [email, setEmail] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("Pakistan (PKR ₨)");
 
   const handleEmailSubmit = (e) => {
     e.preventDefault();
-    console.log("Email submitted:", email);
+    if (email) {
+      toast.success("Thank you for subscribing!");
+      setEmail("");
+    }
   };
 
   return (
@@ -163,16 +175,16 @@ const Footer = () => {
           <div>
             <SectionTitle>Shop</SectionTitle>
             <LinkList>
-              <li><a href="#">Men's Boots</a></li>
-              <li><a href="#">Women's Boots</a></li>
-              <li><a href="#">Men's Sneakers</a></li>
-              <li><a href="#">Women's Sneakers</a></li>
-              <li><a href="#">Men's Shoes</a></li>
-              <li><a href="#">Women's Shoes</a></li>
-              <li><a href="#">Men's Jackets</a></li>
-              <li><a href="#">Women's Jackets</a></li>
-              <li><a href="#">Accessories</a></li>
-              <li><a href="#">Gift Cards</a></li>
+              <li><Link to="/collection?category=boots&subcategory=men">Men's Boots</Link></li>
+              <li><Link to="/collection?category=boots&subcategory=women">Women's Boots</Link></li>
+              <li><Link to="/collection?category=sneakers&subcategory=men">Men's Sneakers</Link></li>
+              <li><Link to="/collection?category=sneakers&subcategory=women">Women's Sneakers</Link></li>
+              <li><Link to="/collection?category=shoes&subcategory=men">Men's Shoes</Link></li>
+              <li><Link to="/collection?category=shoes&subcategory=women">Women's Shoes</Link></li>
+              <li><Link to="/collection?category=jackets&subcategory=men">Men's Jackets</Link></li>
+              <li><Link to="/collection?category=jackets&subcategory=women">Women's Jackets</Link></li>
+              <li><Link to="/collection?category=accessories">Accessories</Link></li>
+              <li><Link to="/gift-cards">Gift Cards</Link></li>
             </LinkList>
           </div>
 
@@ -180,11 +192,11 @@ const Footer = () => {
           <div>
             <SectionTitle>About</SectionTitle>
             <LinkList>
-              <li><a href="#">Our Story</a></li>
-              <li><a href="#">Featured Press</a></li>
-              <li><a href="#">Reviews</a></li>
-              <li><a href="#">Locations</a></li>
-              <li><a href="#">Ambassadors</a></li>
+              <li><Link to="/about">Our Story</Link></li>
+              <li><Link to="/press">Featured Press</Link></li>
+              <li><Link to="/reviews">Reviews</Link></li>
+              <li><Link to="/locations">Locations</Link></li>
+              <li><Link to="/ambassadors">Ambassadors</Link></li>
             </LinkList>
           </div>
 
@@ -192,19 +204,19 @@ const Footer = () => {
           <div>
             <SectionTitle>Support</SectionTitle>
             <LinkList>
-              <li><a href="#">FAQ</a></li>
-              <li><a href="#">Shipping & Returns</a></li>
-              <li><a href="#">Shoe Care</a></li>
-              <li><a href="#">Accessibility Statement</a></li>
-              <li><a href="#">Terms of Service</a></li>
-              <li><a href="#">Privacy Policy</a></li>
-              <li><a href="#">Contact Us</a></li>
+              <li><Link to="/faq">FAQ</Link></li>
+              <li><Link to="/shipping">Shipping & Returns</Link></li>
+              <li><Link to="/care">Shoe Care</Link></li>
+              <li><Link to="/accessibility">Accessibility Statement</Link></li>
+              <li><Link to="/terms">Terms of Service</Link></li>
+              <li><Link to="/privacy">Privacy Policy</Link></li>
+              <li><Link to="/contact">Contact Us</Link></li>
             </LinkList>
           </div>
 
           {/* Newsletter */}
           <div>
-            <SectionTitle>Sign Up For Early Access & Exclusive Events</SectionTitle>
+            <SectionTitle>Stay Connected</SectionTitle>
 
             <EmailForm onSubmit={handleEmailSubmit}>
               <input
@@ -214,14 +226,22 @@ const Footer = () => {
                 placeholder="email@example.com"
                 required
               />
-              <button type="submit">JOIN TEAM </button>
+              <button type="submit">Subscribe</button>
             </EmailForm>
 
             <SocialIcons>
-              <a href="#"><Instagram size={20} /></a>
-              <a href="#"><Facebook size={20} /></a>
-              <a href="#"><Twitter size={20} /></a>
-              <a href="#"><Youtube size={20} /></a>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+                <Instagram size={20} />
+              </a>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
+                <Facebook size={20} />
+              </a>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
+                <Twitter size={20} />
+              </a>
+              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer">
+                <Youtube size={20} />
+              </a>
             </SocialIcons>
 
             <CountrySelect
@@ -233,16 +253,17 @@ const Footer = () => {
               <option value="United Kingdom (GBP £)">United Kingdom (GBP £)</option>
               <option value="Canada (CAD $)">Canada (CAD $)</option>
               <option value="Australia (AUD $)">Australia (AUD $)</option>
+              <option value="Europe (EUR €)">Europe (EUR €)</option>
             </CountrySelect>
 
-            <AccessibilityLink href="#">
+            <AccessibilityLink as={Link} to="/accessibility">
               View In Accessibility Mode
             </AccessibilityLink>
           </div>
         </Grid>
 
         <Copyright>
-          © 2025 lorenvettori.com - All rights reserved.
+          © 2025 Loren Vettori - All rights reserved.
         </Copyright>
       </FooterContainer>
     </FullWidthWrapper>

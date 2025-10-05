@@ -86,7 +86,9 @@ import images from "./images.jpg"
 import men from "./men.jpg"
 import men2 from "./men2.jpg"
 import men3 from "./men3.jpg"
+import sliders from "./sliders.png"
 export const assets = {
+  sliders,
   men,
   men2,
   men3,
