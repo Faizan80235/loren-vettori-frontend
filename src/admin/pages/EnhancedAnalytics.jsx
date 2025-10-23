@@ -17,7 +17,7 @@ const EnhancedAnalyticsDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('30daysAgo-today');
   const [activeTab, setActiveTab] = useState('overview');
-  const [realtimeFilter, setRealtimeFilter] = useState('7d'); // NEW: Time filter for real-time data
+  const [realtimeFilter, setRealtimeFilter] = useState('7d');
   
   const [realtimeData, setRealtimeData] = useState({
     activeUsers: 0,
@@ -31,8 +31,20 @@ const EnhancedAnalyticsDashboard = () => {
 
   const backendUrl = 'http://localhost:5000';
 
+  // ✅ Facebook Pixel tracking helper
+  const trackFacebookEvent = (eventName, params = {}) => {
+    if (typeof window.fbq !== 'undefined') {
+      window.fbq('track', eventName, params);
+      console.log('📘 Facebook Pixel:', eventName, params);
+    }
+  };
+
   useEffect(() => {
     trackPageView('/admin/analytics', 'Analytics Dashboard');
+    trackFacebookEvent('ViewContent', {
+      content_name: 'Analytics Dashboard',
+      content_category: 'Admin'
+    });
   }, [trackPageView]);
 
   useEffect(() => {
@@ -43,9 +55,8 @@ const EnhancedAnalyticsDashboard = () => {
     fetchRealtimeData();
     const interval = setInterval(fetchRealtimeData, 30000);
     return () => clearInterval(interval);
-  }, [realtimeFilter]); // Re-fetch when filter changes
+  }, [realtimeFilter]);
 
-  // ✅ NEW: Track user session on dashboard
   useEffect(() => {
     const trackDashboardSession = async () => {
       const userId = localStorage.getItem('userId');
@@ -53,7 +64,6 @@ const EnhancedAnalyticsDashboard = () => {
       
       if (userId && token) {
         try {
-          // Track page view activity in MongoDB
           await fetch(`${backendUrl}/api/realtime-analytics/track`, {
             method: 'POST',
             headers: {
@@ -92,7 +102,6 @@ const EnhancedAnalyticsDashboard = () => {
     trackDashboardSession();
   }, [activeTab]);
 
-  // Helper functions for device detection
   const getBrowserName = () => {
     const userAgent = navigator.userAgent;
     if (userAgent.includes('Chrome')) return 'Chrome';
@@ -120,6 +129,11 @@ const EnhancedAnalyticsDashboard = () => {
       timestamp: new Date().toISOString()
     });
 
+    trackFacebookEvent('Search', {
+      search_string: 'Analytics Data',
+      content_category: dateRange
+    });
+
     try {
       const token = localStorage.getItem('token');
       const [start, end] = dateRange.split('-');
@@ -142,6 +156,12 @@ const EnhancedAnalyticsDashboard = () => {
           total_users: result.data.overview?.totalUsers,
           total_revenue: result.data.conversions?.revenue
         });
+
+        trackFacebookEvent('ViewContent', {
+          content_name: 'Analytics Data Loaded',
+          value: result.data.conversions?.revenue || 0,
+          currency: 'USD'
+        });
       }
     } catch (error) {
       console.error('Error:', error);
@@ -160,7 +180,6 @@ const EnhancedAnalyticsDashboard = () => {
       
       console.log('🔄 Fetching real-time data...');
       
-      // Track dashboard view in GA4
       trackCustomEvent('admin_dashboard_view', {
         timestamp: new Date().toISOString()
       });
@@ -221,23 +240,29 @@ const EnhancedAnalyticsDashboard = () => {
       
       console.log('✅ Real-time data updated:', {
         activeUsers: activeUsers.count,
+        liveUsersNow: summary.data?.liveUsersNow,
         locations: locations.data?.length,
         sources: sources.data?.length,
         registrations: registrations.data?.length,
         logins: logins.data?.length
       });
       
-      // Track data fetch success in GA4
       trackCustomEvent('realtime_data_loaded', {
         active_users: activeUsers.count,
+        live_users_now: summary.data?.liveUsersNow || 0,
         total_locations: locations.data?.length || 0,
         total_sources: sources.data?.length || 0,
         recent_registrations: registrations.data?.length || 0
       });
+
+      trackFacebookEvent('ViewContent', {
+        content_name: 'Real-time Analytics',
+        content_category: 'Active Users',
+        value: activeUsers.count
+      });
     } catch (error) {
       console.error('❌ Realtime data error:', error);
       
-      // Track error in GA4
       trackCustomEvent('realtime_data_error', {
         error_message: error.message
       });
@@ -247,37 +272,32 @@ const EnhancedAnalyticsDashboard = () => {
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     
-    // Track tab change in both MongoDB and GA4
     trackCustomEvent('analytics_tab_change', {
       tab_name: tab,
       previous_tab: activeTab,
       timestamp: new Date().toISOString()
     });
+
+    trackFacebookEvent('ViewContent', {
+      content_name: `Analytics Tab - ${tab}`,
+      content_category: 'Navigation'
+    });
     
     console.log('📊 Tab changed to:', tab);
   };
 
-  // const handleRealtimeFilterChange = (filter) => {
-  //   setRealtimeFilter(filter);
-    
-  //   // Track filter change in GA4
-  //   trackCustomEvent('realtime_filter_change', {
-  //     filter: filter,
-  //     previous_filter: realtimeFilter,
-  //     timestamp: new Date().toISOString()
-  //   });
-    
-  //   console.log('⏰ Realtime filter changed to:', filter);
-  // };
-
   const handleDateRangeChange = (range) => {
     setDateRange(range);
     
-    // Track date range change in GA4
     trackCustomEvent('analytics_date_range_change', {
       date_range: range,
       previous_range: dateRange,
       timestamp: new Date().toISOString()
+    });
+
+    trackFacebookEvent('CustomizeProduct', {
+      content_name: 'Date Range Changed',
+      value: range
     });
     
     console.log('📅 Date range changed to:', range);
@@ -286,14 +306,26 @@ const EnhancedAnalyticsDashboard = () => {
   const handleRealtimeFilterChange = (filter) => {
     setRealtimeFilter(filter);
     
-    // Track filter change in GA4
     trackCustomEvent('realtime_filter_change', {
       filter: filter,
       previous_filter: realtimeFilter,
       timestamp: new Date().toISOString()
     });
+
+    trackFacebookEvent('CustomizeProduct', {
+      content_name: 'Time Filter Changed',
+      value: filter
+    });
+  };
+
+  const handleStatCardClick = (cardName, value) => {
+    trackCustomEvent('stat_card_clicked', { card: cardName });
     
-    // console.log('⏰ Realtime filter changed to:', filter);
+    trackFacebookEvent('ViewContent', {
+      content_name: `Stat Card - ${cardName}`,
+      content_category: 'Metrics',
+      value: value || 0
+    });
   };
 
   const getFilterLabel = (filter) => {
@@ -378,6 +410,7 @@ const EnhancedAnalyticsDashboard = () => {
               Analytics Dashboard
             </h1>
             <p className="text-gray-600">Track users, orders, and traffic sources in real-time</p>
+            <p className="text-xs text-blue-600 mt-1">✅ Facebook Pixel & Google Analytics Integrated</p>
           </div>
           <div className="flex gap-4">
             <select
@@ -393,6 +426,7 @@ const EnhancedAnalyticsDashboard = () => {
               onClick={() => {
                 fetchAnalytics();
                 fetchRealtimeData();
+                trackFacebookEvent('Search', { search_string: 'Refresh Data' });
               }}
               className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
@@ -402,7 +436,6 @@ const EnhancedAnalyticsDashboard = () => {
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="flex justify-between items-center border-b border-gray-200">
           <div className="flex gap-4">
             {['overview', 'live', 'social', 'registrations'].map((tab) => (
@@ -420,7 +453,6 @@ const EnhancedAnalyticsDashboard = () => {
             ))}
           </div>
           
-          {/* Time Filter - Only show on specific tabs */}
           {['live', 'registrations'].includes(activeTab) && (
             <div className="flex items-center gap-2 pb-2">
               <span className="text-sm text-gray-600">Time Range:</span>
@@ -444,29 +476,56 @@ const EnhancedAnalyticsDashboard = () => {
         </div>
       </div>
 
-      {/* ✅ UPDATED: Banner with dynamic time range */}
-      <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-6 mb-6 text-white shadow-lg">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-green-100 text-sm mb-1 flex items-center gap-2">
-              <span className="animate-pulse">🟢</span> Active Users ({getFilterLabel(realtimeFilter)})
-            </p>
-            <p className="text-5xl font-bold">{realtimeData.activeUsers}</p>
-            <p className="text-green-100 text-sm mt-2">
-              Users who were active in the {getFilterLabel(realtimeFilter).toLowerCase()}
-            </p>
-            <p className="text-green-100 text-xs mt-1">
-              Last updated: {new Date().toLocaleTimeString()}
-            </p>
+      {/* ✅ Two Banners - Live Now + Selected Time Range */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Live Users Right Now */}
+        <div className="bg-gradient-to-r from-red-500 to-pink-600 rounded-xl p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-red-100 text-sm mb-1 flex items-center gap-2">
+                <span className="animate-pulse">🔴</span> LIVE RIGHT NOW
+              </p>
+              <p className="text-5xl font-bold">{realtimeData.summary?.liveUsersNow || 0}</p>
+              <p className="text-red-100 text-sm mt-2">
+                Users actively browsing right now
+              </p>
+              <p className="text-red-100 text-xs mt-1">
+                Updates every 30 seconds
+              </p>
+            </div>
+            <div className="relative">
+              <Activity className="w-20 h-20 text-red-100 animate-pulse" />
+              <div className="absolute -top-2 -right-2 bg-white text-red-600 text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+                LIVE
+              </div>
+            </div>
           </div>
-          <Activity className="w-20 h-20 text-green-100 animate-pulse" />
+        </div>
+
+        {/* Active Users in Selected Time Range */}
+        <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-100 text-sm mb-1 flex items-center gap-2">
+                <span className="animate-pulse">🟢</span> Active Users ({getFilterLabel(realtimeFilter)})
+              </p>
+              <p className="text-5xl font-bold">{realtimeData.activeUsers}</p>
+              <p className="text-green-100 text-sm mt-2">
+                Users who were active in the {getFilterLabel(realtimeFilter).toLowerCase()}
+              </p>
+              <p className="text-green-100 text-xs mt-1">
+                Last updated: {new Date().toLocaleTimeString()}
+              </p>
+            </div>
+            <Activity className="w-20 h-20 text-green-100" />
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div 
           className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition cursor-pointer"
-          onClick={() => trackCustomEvent('stat_card_clicked', { card: 'total_users' })}
+          onClick={() => handleStatCardClick('total_users', overview.totalUsers)}
         >
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-blue-50 rounded-lg">
@@ -481,7 +540,7 @@ const EnhancedAnalyticsDashboard = () => {
 
         <div 
           className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition cursor-pointer"
-          onClick={() => trackCustomEvent('stat_card_clicked', { card: 'new_registrations' })}
+          onClick={() => handleStatCardClick('new_registrations', realtimeData.summary?.todayRegistrations)}
         >
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-green-50 rounded-lg">
@@ -498,7 +557,7 @@ const EnhancedAnalyticsDashboard = () => {
 
         <div 
           className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition cursor-pointer"
-          onClick={() => trackCustomEvent('stat_card_clicked', { card: 'orders' })}
+          onClick={() => handleStatCardClick('orders', conversions.transactions)}
         >
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-purple-50 rounded-lg">
@@ -513,7 +572,7 @@ const EnhancedAnalyticsDashboard = () => {
 
         <div 
           className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition cursor-pointer"
-          onClick={() => trackCustomEvent('stat_card_clicked', { card: 'revenue' })}
+          onClick={() => handleStatCardClick('revenue', conversions.revenue)}
         >
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-orange-50 rounded-lg">
@@ -574,7 +633,6 @@ const EnhancedAnalyticsDashboard = () => {
         </div>
       )}
 
-      {/* ✅ UPDATED: Live Tab title changed to 24 Hours */}
       {activeTab === 'live' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <div className="bg-white rounded-xl shadow-lg p-6">
@@ -860,9 +918,13 @@ const EnhancedAnalyticsDashboard = () => {
         <p className="font-semibold">Last updated: {new Date().toLocaleString()}</p>
         <p className="mt-1">Real-time data refreshes automatically every 30 seconds</p>
         <p className="mt-1 text-xs">
-          Active Users (24h): {realtimeData.activeUsers} | 
+          Live Users Now: {realtimeData.summary?.liveUsersNow || 0} | 
+          Active Users ({getFilterLabel(realtimeFilter)}): {realtimeData.activeUsers} | 
           Today's Registrations: {realtimeData.summary?.todayRegistrations || 0} | 
           Today's Logins: {realtimeData.summary?.todayLogins || 0}
+        </p>
+        <p className="mt-2 text-xs text-blue-600 font-semibold">
+          ✅ Tracking via: Facebook Pixel (323748383968251) + Google Analytics (G-WV4V5H4GTQ)
         </p>
       </div>
     </div>

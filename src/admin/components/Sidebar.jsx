@@ -34,6 +34,13 @@ const Sidebar = () => {
           <Users size={20} className="text-gray-800" />
           <p className="md:block">Customers</p>
         </NavLink>
+         <NavLink
+          to="/admin/measurements"
+          className="flex items-center gap-3 border border-gray-300 border-r-0 px-3 py-2 rounded-l"
+        >
+          <Users size={20} className="text-gray-800" />
+          <p className="md:block">Measurements</p>
+        </NavLink>
       </div>
     </div>
   )

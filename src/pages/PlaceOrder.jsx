@@ -69,11 +69,11 @@ const PlaceOrder = () => {
       const product = products.find(product => product._id === itemId);
       
       if (!product) {
-        console.error(`❌ Product not found for ID: ${itemId}`);
+        console.error(`âŒ Product not found for ID: ${itemId}`);
         return;
       }
       
-      console.log(`✅ Found product:`, {
+      console.log(`âœ… Found product:`, {
         id: product._id,
         name: product.name,
         price: product.price,
@@ -129,7 +129,7 @@ const PlaceOrder = () => {
 
   // Enhanced PayPal create order with extensive debugging
   const createPayPalOrder = async (data, actions) => {
-    console.log('🚀🚀🚀 PAYPAL CREATE ORDER STARTED 🚀🚀🚀');
+    console.log('ðŸš€ðŸš€ðŸš€ PAYPAL CREATE ORDER STARTED ðŸš€ðŸš€ðŸš€');
     console.log('PayPal data:', data);
     console.log('PayPal actions:', actions);
     
@@ -140,23 +140,23 @@ const PlaceOrder = () => {
       for (let field of required) {
         console.log(`Checking ${field}:`, formData[field]);
         if (!formData[field]?.trim()) {
-          console.error(`❌ Missing field: ${field}`);
+          console.error(`âŒ Missing field: ${field}`);
           toast.error(`Please fill in ${field}`);
           throw new Error(`Form validation failed: missing ${field}`);
         }
       }
-      console.log('✅ Form validation passed');
+      console.log('âœ… Form validation passed');
 
       // Token validation
       console.log('=== TOKEN VALIDATION ===');
       console.log('Token exists:', !!token);
       console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'null');
       if (!token) {
-        console.error('❌ No authentication token');
+        console.error('âŒ No authentication token');
         toast.error('Please login to continue');
         throw new Error('No authentication token');
       }
-      console.log('✅ Token validation passed');
+      console.log('âœ… Token validation passed');
 
       setPaypalProcessing(true);
       
@@ -165,7 +165,7 @@ const PlaceOrder = () => {
       const orderItems = getOrderItems();
       
       if (orderItems.length === 0) {
-        console.error('❌ No order items found');
+        console.error('âŒ No order items found');
         toast.error('Your cart is empty');
         throw new Error('Cart is empty');
       }
@@ -184,12 +184,12 @@ const PlaceOrder = () => {
       }, 0);
       const itemsTotalWithDelivery = itemsSubtotal + deliveryFee;
 
-      console.log('💰 Cart amount (from getCartAmount):', cartAmount);
-      console.log('💰 Items subtotal (calculated):', itemsSubtotal);
-      console.log('💰 Delivery fee:', deliveryFee);
-      console.log('💰 Total (cart + delivery):', totalAmount);
-      console.log('💰 Total (items + delivery):', itemsTotalWithDelivery);
-      console.log('💰 Difference:', Math.abs(totalAmount - itemsTotalWithDelivery));
+      console.log('ðŸ’° Cart amount (from getCartAmount):', cartAmount);
+      console.log('ðŸ’° Items subtotal (calculated):', itemsSubtotal);
+      console.log('ðŸ’° Delivery fee:', deliveryFee);
+      console.log('ðŸ’° Total (cart + delivery):', totalAmount);
+      console.log('ðŸ’° Total (items + delivery):', itemsTotalWithDelivery);
+      console.log('ðŸ’° Difference:', Math.abs(totalAmount - itemsTotalWithDelivery));
 
       // Prepare request data
       const requestData = {
@@ -219,12 +219,12 @@ const PlaceOrder = () => {
       console.log('Response data:', response.data);
 
       if (response.data && response.data.success) {
-        console.log('✅✅✅ ORDER CREATED SUCCESSFULLY ✅✅✅');
+        console.log('âœ…âœ…âœ… ORDER CREATED SUCCESSFULLY âœ…âœ…âœ…');
         console.log('PayPal Order ID:', response.data.orderId);
         toast.success('PayPal order created successfully!');
         return response.data.orderId;
       } else {
-        console.error('❌❌❌ SERVER RETURNED ERROR ❌❌❌');
+        console.error('âŒâŒâŒ SERVER RETURNED ERROR âŒâŒâŒ');
         console.error('Error message:', response.data?.message);
         console.error('Full response:', response.data);
         const errorMsg = response.data?.message || 'Server returned unsuccessful response';
@@ -233,7 +233,7 @@ const PlaceOrder = () => {
       }
 
     } catch (error) {
-      console.error('❌❌❌ PAYPAL CREATE ORDER FAILED ❌❌❌');
+      console.error('âŒâŒâŒ PAYPAL CREATE ORDER FAILED âŒâŒâŒ');
       console.error('Error type:', error.constructor.name);
       console.error('Error message:', error.message);
       console.error('Error stack:', error.stack);
@@ -247,7 +247,7 @@ const PlaceOrder = () => {
         
         // Handle specific HTTP errors
         if (error.response.status === 401) {
-          console.log('🔐 Authentication error - redirecting to login');
+          console.log('ðŸ” Authentication error - redirecting to login');
           toast.error('Please login again');
           localStorage.removeItem('token');
           navigate('/login');
@@ -271,14 +271,14 @@ const PlaceOrder = () => {
       
       throw new Error(error.message || 'Failed to create PayPal order');
     } finally {
-      console.log('🔄 Cleaning up PayPal processing state');
+      console.log('ðŸ”„ Cleaning up PayPal processing state');
       setPaypalProcessing(false);
     }
   };
 
   // Other handlers remain the same but with better logging
   const onPayPalApprove = useCallback(async (data, actions) => {
-    console.log('💳 PayPal payment approved:', data);
+    console.log('ðŸ’³ PayPal payment approved:', data);
     try {
       setPaypalProcessing(true);
       const response = await axios.post(`${backendUrl}/api/order/paypal/capture`, {
@@ -539,4 +539,4 @@ const PlaceOrder = () => {
   );
 };
 
-export default PlaceOrder;
+export default PlaceOrder

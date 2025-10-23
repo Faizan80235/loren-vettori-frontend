@@ -1,5 +1,3 @@
-
-
 import React, { useState, useContext, useEffect } from 'react'
 import { ShopContext } from '../context/ShopContext';
 import { assets } from '../assets/assets';
@@ -12,9 +10,18 @@ const Collection = () => {
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
   const [subcategory, setSubCategory] = useState([]);
-  const [productType, setProductType] = useState([]); // New filter for jackets waigara
+  const [productType, setProductType] = useState([]);
+  const [expandedCategories, setExpandedCategories] = useState({});
   const [sortType, setSortType] = useState('relevant');
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
+
+  // Toggle category expansion
+  const toggleCategoryExpansion = (cat) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [cat]: !prev[cat]
+    }));
+  };
 
   // Toggle category filter
   const toggleCategory = (e) => {
@@ -45,6 +52,35 @@ const Collection = () => {
       setProductType(prev => [...prev, value]);
     }
   }
+
+  // Get categories with their subcategories and counts
+  const getCategoryStructure = () => {
+    const structure = {};
+    
+    products?.forEach(product => {
+      const cat = product.category;
+      const subcat = product.subcategory;
+      
+      if (cat) {
+        if (!structure[cat]) {
+          structure[cat] = {
+            count: 0,
+            subcategories: {}
+          };
+        }
+        structure[cat].count++;
+        
+        if (subcat) {
+          if (!structure[cat].subcategories[subcat]) {
+            structure[cat].subcategories[subcat] = 0;
+          }
+          structure[cat].subcategories[subcat]++;
+        }
+      }
+    });
+    
+    return structure;
+  };
 
   // Apply all filters
   const applyFilter = () => {
@@ -166,13 +202,11 @@ const Collection = () => {
   const getProductTypes = () => {
     const types = ['Jackets', 'Coats', 'Blazers', 'Hoodies', 'Sweaters', 'Cardigans', 'Vests', 'Outerwear'];
     
-    // Also extract from actual product data if available
     const extractedTypes = products?.reduce((acc, product) => {
       const productType = product.productType || product.type || '';
       const name = product.name || '';
       const subcategory = product.subcategory || '';
       
-      // Check if product contains jacket-like keywords
       const keywords = ['jacket', 'coat', 'blazer', 'hoodie', 'sweater', 'cardigan', 'vest'];
       keywords.forEach(keyword => {
         if (
@@ -210,6 +244,8 @@ const Collection = () => {
   useEffect(() => {
     sortProduct();
   }, [sortType]);
+
+  const categoryStructure = getCategoryStructure();
 
   // Loading component
   const LoadingComponent = () => (
@@ -295,45 +331,67 @@ const Collection = () => {
           )}
         </div>
 
-        {/* Category Filter */}
+        {/* NEW: Expandable Categories with Subcategories */}
         <div className={`border border-gray-300 pl-5 py-3 mt-6 ${showFilter ? '' : 'hidden'} sm:block`}>
           <p className='mb-3 text-sm font-medium'>CATEGORIES</p>
           <div className='flex flex-col gap-2 text-sm font-light text-gray-700'>
-            {getUniqueValues('category').map(cat => (
-              <label key={cat} className='flex gap-2 cursor-pointer'>
-                <input 
-                  className='w-3' 
-                  type="checkbox" 
-                  onChange={toggleCategory} 
-                  value={cat}
-                  checked={category.includes(cat)}
-                />
-                {cat} ({products?.filter(p => p.category === cat).length || 0})
-              </label>
+            {Object.entries(categoryStructure).map(([cat, data]) => (
+              <div key={cat} className=''>
+                {/* Main Category */}
+                <div className='flex items-center justify-between'>
+                  <label className='flex gap-2 cursor-pointer flex-1'>
+                    <input 
+                      className='w-3' 
+                      type="checkbox" 
+                      onChange={toggleCategory} 
+                      value={cat}
+                      checked={category.includes(cat)}
+                    />
+                    <span className='font-medium'>{cat}</span>
+                    <span className='text-gray-500'>({data.count})</span>
+                  </label>
+                  
+                  {/* Expand/Collapse if has subcategories */}
+                  {Object.keys(data.subcategories).length > 0 && (
+                    <button
+                      onClick={() => toggleCategoryExpansion(cat)}
+                      className='p-1 hover:bg-gray-100 rounded'
+                    >
+                      <img 
+                        className={`h-3 transition-transform ${expandedCategories[cat] ? 'rotate-180' : ''}`} 
+                        src={assets.dropdown_icon} 
+                        alt="" 
+                      />
+                    </button>
+                  )}
+                </div>
+                
+                {/* Subcategories */}
+                {expandedCategories[cat] && Object.keys(data.subcategories).length > 0 && (
+                  <div className='ml-5 mt-1 space-y-1 bg-gray-50 p-2 rounded'>
+                    {Object.entries(data.subcategories).map(([subcat, count]) => (
+                      <label 
+                        key={subcat} 
+                        className='flex gap-2 cursor-pointer text-xs'
+                      >
+                        <input 
+                          className='w-3' 
+                          type="checkbox" 
+                          onChange={toggleSubCategory} 
+                          value={subcat}
+                          checked={subcategory.includes(subcat)}
+                        />
+                        {subcat} <span className='text-gray-400'>({count})</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>
 
-        {/* Subcategory Filter */}
-        <div className={`border border-gray-300 pl-5 py-3 mt-6 ${showFilter ? '' : 'hidden'} sm:block`}>
-          <p className='mb-3 text-sm font-medium'>TYPE</p>
-          <div className='flex flex-col gap-2 text-sm font-light text-gray-700'>
-            {getUniqueValues('subcategory').map(subcat => (
-              <label key={subcat} className='flex gap-2 cursor-pointer'>
-                <input 
-                  className='w-3' 
-                  type="checkbox" 
-                  onChange={toggleSubCategory} 
-                  value={subcat}
-                  checked={subcategory.includes(subcat)}
-                />
-                {subcat} ({products?.filter(p => p.subcategory === subcat).length || 0})
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* Jackets Waigara Filter - NEW */}
+        {/* Jackets Waigara Filter */}
         <div className={`border border-gray-300 pl-5 py-3 mt-6 ${showFilter ? '' : 'hidden'} sm:block`}>
           <p className='mb-3 text-sm font-medium'>JACKETS & OUTERWEAR</p>
           <div className='flex flex-col gap-2 text-sm font-light text-gray-700'>
